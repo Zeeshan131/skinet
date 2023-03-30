@@ -10,15 +10,18 @@ import { IProduct } from './models/product';
 })
 export class AppComponent implements OnInit {
   title = 'Skinet';
-  products: IProduct[];
+  products: IProduct[] = [];
 
   constructor(private http: HttpClient){}
 
   ngOnInit(): void {
-    this.http.get('https://localhost:5001/api/products?pageSize=50').subscribe((response: IPagination) => {
-      this.products = response.data;
-    }, error => {
-      console.log(error);
+    this.http.get<IPagination<IProduct []>>('https://localhost:5001/api/products?pageSize=50').subscribe({
+      next: (response: any) => this.products = response.data,     // What to do next
+      error: error => console.log(error),                         // What to do if there is an error
+      complete: () => {
+        console.log('Request completed');
+        console.log('Extra statements');
+      }
     });
   }
 }
