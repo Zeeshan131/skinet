@@ -14,7 +14,7 @@ export class ShopService {
 
   constructor(private http: HttpClient) { }
 
-  getProducts(shopParams:ShopParams) {
+  getProducts(shopParams: ShopParams) {
     let params = new HttpParams();
 
     if (shopParams.brandId > 0) params = params.append('brandId', shopParams.brandId);
@@ -24,7 +24,11 @@ export class ShopService {
     params = params.append('PageSize', shopParams.pageSize);
     if (shopParams.search) params = params.append('Search', shopParams.search);
 
-    return this.http.get<IPagination<IProduct[]>>(this.baseUrl + 'products', {params});
+    return this.http.get<IPagination<IProduct[]>>(this.baseUrl + 'products', { params });
+  }
+
+  getProduct(id: number) {
+    return this.http.get<IProduct>(this.baseUrl + 'products/' + id);
   }
 
   getBrands() {
