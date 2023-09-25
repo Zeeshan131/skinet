@@ -64,7 +64,7 @@ public class OrdersController : BaseApiController
     }
 
     [HttpGet("deliveryMethods")]
-    public async Task<ActionResult<IReadOnlyList<DeliveryMethod>>> GetDeliveryMethods(int id)
+    public async Task<ActionResult<IReadOnlyList<DeliveryMethod>>> GetDeliveryMethods()
     {
         return Ok(await _orderService.GetDeliveryMethodsAsync());
     }

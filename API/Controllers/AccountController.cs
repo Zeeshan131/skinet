@@ -44,8 +44,8 @@ public class AccountController : BaseApiController
         return await _userManager.FindByEmailAsync(email) != null;
     }
 
-    [HttpGet("address")]
     [Authorize]
+    [HttpGet("address")]
     public async Task<ActionResult<AddressDto>> GetUserAddress()
     {
         var user = await _userManager.FindUserByClaimsPrincipleWithAddress(User);
@@ -53,8 +53,8 @@ public class AccountController : BaseApiController
         return _mapper.Map<Address, AddressDto>(user.Address);
     }
 
-    [HttpPut("address")]
     [Authorize]
+    [HttpPut("address")]
     public async Task<ActionResult<AddressDto>> UpdateUserAddress(AddressDto addressDto)
     {
         var user = await _userManager.FindUserByClaimsPrincipleWithAddress(User);
