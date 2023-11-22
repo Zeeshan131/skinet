@@ -11,7 +11,7 @@ import { AccountService } from 'src/app/account/account.service';
 export class CheckoutAddressComponent {
   @Input() checkoutForm?: FormGroup;
 
-  constructor(private accountService: AccountService, private toastr: ToastrService){}
+  constructor(private accountService: AccountService, private toastr: ToastrService) { }
 
   saveUserAddress() {
     this.accountService.updateUserAddress(this.checkoutForm?.get('addressForm')?.value).subscribe({

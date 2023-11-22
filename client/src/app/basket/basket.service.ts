@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { CustomerBasket, ICustomerBasket } from '../shared/models/customerBasket';
 import { HttpClient } from '@angular/common/http';
@@ -17,13 +17,25 @@ export class BasketService {
   basketSource$ = this.basketSource.asObservable();
   private basketTotalSource = new BehaviorSubject<IBasketTotals | null>(null);
   basketTotalSource$ = this.basketTotalSource.asObservable();
-  shipping = 0;
 
   constructor(private http: HttpClient) { }
 
+  createPaymentIntent() {
+    return this.http.post<ICustomerBasket>(this.baseUrl + 'Payments/' + this.getCurrentBasketValue()?.id, {})
+      .pipe(
+        map(basket => {
+          this.basketSource.next(basket);
+        })
+      )
+  }
+
   setShippingPrice(deliveryMethod: IDeliveryMethod) {
-    this.shipping = deliveryMethod.price;
-    this.calculateTotals();
+    const basket = this.getCurrentBasketValue();
+    if (basket) {
+      basket.shippingPrice = deliveryMethod.price;
+      basket.deliveryMethodId = deliveryMethod.id;
+      this.setBasket(basket);
+    }
   }
 
   getBasket(id: string) {
@@ -45,7 +57,7 @@ export class BasketService {
   }
 
   deleteBasket(customerBasket: ICustomerBasket) {
-    return this.http.delete(this.baseUrl + 'basket?id=' + customerBasket.id).subscribe({
+    return this.http.delete(this.baseUrl + 'Basket?id=' + customerBasket.id).subscribe({
       next: () => {
         this.deleteLocalBasket();
       }
@@ -82,8 +94,8 @@ export class BasketService {
     const basket = this.getCurrentBasketValue();
     if (!basket) return;
     const subtotal = basket.items.reduce((prevVal, currVal) => prevVal + (currVal.price * currVal.quantity), 0);
-    const total = subtotal + this.shipping;
-    this.basketTotalSource.next({ shipping: this.shipping, total, subtotal });
+    const total = subtotal + basket.shippingPrice;
+    this.basketTotalSource.next({ shipping: basket.shippingPrice, total, subtotal });
   }
 
   deleteLocalBasket() {

@@ -17,10 +17,10 @@ public class OrderService : IOrderService
 
     public async Task<Order> CreateOrderAsync(string buyerEmail, int deliveryMethodId, string basketId, Address shippingAddress)
     {
-        // Get basket from the repo
+        // get basket from repo
         var basket = await _basketRepo.GetBasketAsync(basketId);
 
-        // Get items from the product repo
+        // get items from the product repo
         var items = new List<OrderItem>();
         foreach (var item in basket.Items)
         {
@@ -30,29 +30,37 @@ public class OrderService : IOrderService
             items.Add(orderItem);
         }
 
-        // Get delivery method from the repo
+        // get delivery method from repo
         var deliveryMethod = await _unitOfWork.Repository<DeliveryMethod>().GetByIdAsync(deliveryMethodId);
 
-        // Calc subtotal
+        // calc subtotal
         var subtotal = items.Sum(item => item.Price * item.Quantity);
 
-        // Create order
-        var order = new Order(items, buyerEmail, shippingAddress, deliveryMethod, subtotal);
+        // check to see if order exists
+        var spec = new OrderByPaymentIntentIdSpecification(basket.PaymentIntentId);
+        var order = await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);
 
-        _unitOfWork.Repository<Order>().Add(order);
-
-        // Save to db
-        var result = await _unitOfWork.Complete();
-
-        if (result <= 0)
+        if (order != null)
         {
-            return null;
+            order.ShipToAddress = shippingAddress;
+            order.DeliveryMethod = deliveryMethod;
+            order.Subtotal = subtotal;
+            _unitOfWork.Repository<Order>().Update(order);
+        }
+        else
+        {
+            // create order
+            order = new Order(items, buyerEmail, shippingAddress, deliveryMethod,
+                subtotal, basket.PaymentIntentId);
+            _unitOfWork.Repository<Order>().Add(order);
         }
 
-        // Delete basket
-        await _basketRepo.DeleteBasketAsync(basketId);
+        // save to db
+        var result = await _unitOfWork.Complete();
 
-        // Return order
+        if (result <= 0) return null;
+
+        // return order
         return order;
     }
 

@@ -25,18 +25,18 @@ export class ShopService {
     params = params.append('PageSize', shopParams.pageSize);
     if (shopParams.search) params = params.append('Search', shopParams.search);
 
-    return this.http.get<IPagination<IProduct[]>>(this.baseUrl + 'products', { params });
+    return this.http.get<IPagination<IProduct[]>>(this.baseUrl + 'Products', { params });
   }
 
   getProduct(id: number) {
-    return this.http.get<IProduct>(this.baseUrl + 'products/' + id);
+    return this.http.get<IProduct>(this.baseUrl + 'Products/' + id);
   }
 
   getBrands() {
-    return this.http.get<IBrand[]>(this.baseUrl + 'products/brands');
+    return this.http.get<IBrand[]>(this.baseUrl + 'Products/brands');
   }
 
   getTypes() {
-    return this.http.get<IType[]>(this.baseUrl + 'products/types');
+    return this.http.get<IType[]>(this.baseUrl + 'Products/types');
   }
 }
