@@ -14,7 +14,7 @@ public static class IdentityServicesExtensions
     {
         services.AddDbContext<AppIdentityDbContext>(option =>
         {
-            option.UseSqlite(configuration.GetConnectionString("IdentityConnection"));
+            option.UseNpgsql(configuration.GetConnectionString("IdentityConnection"));
         });
 
         services.AddIdentityCore<AppUser>(option =>
